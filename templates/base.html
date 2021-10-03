@@ -1,0 +1,42 @@
+
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Blood Donation Form</title>
+
+    <!-- Font Icon -->
+    <link rel="stylesheet" href="{% static 'fonts/material-icon/css/material-design-iconic-font.min.css' %}">
+
+    <!-- Main css -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body style="background-image:linear-gradient(0deg, rgba(8, 24, 12, 0.541) 50%, rgba(78, 20, 10, 0.26) 100%), url('{% static '/images/blood_image2.jpg' %}')">
+
+
+    <div class="main">
+
+        <section class="signup">
+            <!-- <img class="image" src="images/signup-bg.jpg" alt="">  -->
+            <div class="container">
+
+                {% block content %}  
+
+                
+
+                {% endblock %}
+                    
+              
+            </div> 
+        </section>
+
+    </div>
+
+
+</body>
+</html>
