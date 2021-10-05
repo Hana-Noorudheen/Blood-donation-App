@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.shortcuts import render,redirect
 from django.http import request,HttpResponse
-import random
 from . models import donor_details
 from django.contrib.auth.models import User,auth
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -52,6 +52,7 @@ def form(request):
 
   else:
     return render(request,'index.html')
+    
 
 
 def display(request):
@@ -67,8 +68,13 @@ def display(request):
   page_number=request.GET.get('page')
   details=paginator.get_page(page_number)
   
+  if request.session.has_key('username'):
+      username = request.session['username']
+      return render(request, 'display.html', {"username" : username,'result':details})
+  else:
+      return render(request, 'login.html')
 
-  return render(request,'display.html',{'result':details})
+  
 
 
 def signup(request):
@@ -81,53 +87,99 @@ def signup(request):
         Password=request.POST['password']
         ConfirmPassword=request.POST['confirm_password']
 
-        if Password==ConfirmPassword:
+        
 
-            
+        if User.objects.filter(email=Email).exists():
+              # messages.info(request,'email taken')
+              return JsonResponse(
 
-            if User.objects.filter(email=Email).exists():
-                messages.info(request,'email taken')
-                return redirect('signup')
-
-            else:
-                user = User.objects.create_user(first_name=Name,email=Email,password=Password,username=Email)
-                user.save()
-                return redirect('login')
-                
+              {'success':True},
+              safe=False
+              )
 
         else:
+              user = User.objects.create_user(first_name=Name,email=Email,password=Password,username=Email)
+              user.save()
+              return JsonResponse(
 
-            messages.info(request,'Password invalid')
-            return redirect('signup')
+              {'success':False},
+              safe=False
+              )
+                
+
             
 
-        
-        return redirect('/accounts/login')
     else:    
         return render(request,'signup.html')
 
 
+
+
+
 def login(request):
+
+    
     if request.method== 'POST':
+
         email = request.POST['email']
         password = request.POST['password']
 
-        user = auth.authenticate(username=email, password=password)
+        check_user = auth.authenticate(username=email, password=password)
+        
+        if check_user:
+          request.session['username'] = email
+          return JsonResponse(
 
-        if user is not None:
-            auth.login(request,user)
-            return redirect("/display")
+              {'success':True},
+               safe=False
+             )
 
         else:
-            messages.info(request,'invalid credentials')
-            return redirect('login')    
+
+            
+          return JsonResponse(
+               {'success':False},
+               safe=False
+             )      
+          
+
+       
+
+        # user = auth.authenticate(username=email, password=password)
+
+        # if user is not None:
+        #     auth.login(request,user)
+        #     return JsonResponse(
+
+        #       {'success':True},
+        #       safe=False
+        #     )
+
+        # else:
+            
+        #     return JsonResponse(
+
+        #       {'success':False},
+        #       safe=False
+        #     ) 
+       
+        
+
+
+
     else:
         return render(request, 'login.html') 
 
 
 
 def logout(request):
-    auth.logout(request)
+    try:
+        del request.session['username']
+    except:
+        return redirect('login')
+
+
+    # auth.logout(request)
     return redirect('/login')           
 
 
